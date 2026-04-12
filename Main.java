@@ -1,159 +1,197 @@
-/// Assignment 1: Recursion
-//Student: Serikkazy Akarys
-//Group: SE-2514
+import java.util.*;
 
-/// Task 1. Print Digits of a Number
-public static void printNumber(int n) {
-    if (n == 0) {
-        return;
+public class Main {
+    public static void main(String[] args) {
+        LinkedList<BankAccount> accounts = new LinkedList<>();
+        Scanner sc = new Scanner(System.in);
+        Stack<String> history = new Stack<>();
+        Queue<String> billQueue = new LinkedList<>();
+        Queue<BankAccount> accountRequests = new LinkedList<>();
+
+        BankAccount[] fixedAccounts = new BankAccount[3];
+
+        fixedAccounts[0] = new BankAccount(1, "Akarys", 15000);
+        fixedAccounts[1] = new BankAccount(2, "Abyl", 20000);
+        fixedAccounts[2] = new BankAccount(3, "Nurda", 30000);
+
+        while (true) {
+            System.out.println("\n1. Add account");
+            System.out.println("2. Show all accounts");
+            System.out.println("3. Search by username");
+            System.out.println("4. Deposit");
+            System.out.println("5. Withdraw");
+            System.out.println("6. Pay bill");
+            System.out.println("7. Show last transaction");
+            System.out.println("8. Undo last transaction");
+            System.out.println("9. Add bill request");
+            System.out.println("10. Process next bill");
+            System.out.println("11. Show bill queue");
+            System.out.println("12. Submit account request");
+            System.out.println("13. Process account request (Admin)");
+            System.out.println("14. Show pending requests");
+            System.out.println("15. Exit");
+            System.out.println("0. Show fixed accounts (Array)");
+
+            System.out.println("\nEnter your choice: ");
+            int choice = sc.nextInt();
+            sc.nextLine();
+
+            if (choice == 0) {
+                System.out.println("Fixed Accounts (Array):");
+
+                for (int i = 0; i < fixedAccounts.length; i++) {
+                    fixedAccounts[i].display();
+                }
+            } else if (choice == 1) {
+                int accountNumber = accounts.size() + 1;
+
+                System.out.println("Enter username: ");
+                String username = sc.nextLine();
+
+                System.out.println("Enter balance: ");
+                double balance = sc.nextDouble();
+
+                accounts.add(new BankAccount(accountNumber, username, balance));
+                System.out.println("Account added successfully");
+
+            } else if (choice == 2) {
+                System.out.println("\nAll accounts: ");
+                for (BankAccount acc : accounts) {
+                    acc.display();
+                }
+            } else if (choice == 3) {
+                System.out.println("Enter username: ");
+                String search = sc.nextLine();
+
+                boolean found = false;
+                for (BankAccount acc : accounts) {
+                    if (acc.username.equalsIgnoreCase(search)) {
+                        acc.display();
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    System.out.println("Account not found");
+                }
+            } else if (choice == 4) {
+                System.out.println("Enter username: ");
+                String name = sc.nextLine();
+
+                boolean found = false;
+                for (BankAccount acc : accounts) {
+                    if (acc.username.equalsIgnoreCase(name)) {
+                        System.out.println("Enter amount: ");
+                        double money = sc.nextDouble();
+                        sc.nextLine();
+
+                        acc.balance += money;
+                        history.push("Deposit " + money + " to " + name);
+                        System.out.println("New balance: " + acc.balance);
+
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    System.out.println("Account not found");
+                }
+            } else if (choice == 5) {
+                System.out.println("Enter username: ");
+                String name = sc.nextLine();
+
+                boolean found = false;
+                for (BankAccount acc : accounts) {
+                    if (acc.username.equalsIgnoreCase(name)) {
+                        System.out.println("Enter amount: ");
+                        double money = sc.nextDouble();
+                        sc.nextLine();
+
+                        if (acc.balance >= money) {
+                            acc.balance -= money;
+                            history.push("Withdraw " + money + " from " + name);
+                            System.out.println("New balance: " + acc.balance);
+                        } else {
+                            System.out.println("Not enough money");
+                        }
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    System.out.println("Account not found");
+                }
+            } else if (choice == 6) {
+                System.out.println("Enter bill type: ");
+                String bill = sc.nextLine();
+
+                System.out.println("Enter amount: ");
+                double money = sc.nextDouble();
+                sc.nextLine();
+
+                System.out.println("Bill paid: " + bill);
+                history.push("Bill payment " + money + " (" + bill + ")");
+
+            } else if (choice == 7) {
+                if (!history.isEmpty()) {
+                    System.out.println("Last transaction: " + history.peek());
+                } else {
+                    System.out.println("No transactions");
+                }
+            } else if (choice == 8) {
+                if (!history.isEmpty()) {
+                    System.out.println("Undo: " + history.pop());
+                } else {
+                    System.out.println("Nothing to undo");
+                }
+            } else if (choice == 9) {
+                System.out.println("Enter bill type: ");
+                String bill = sc.nextLine();
+
+                billQueue.add(bill);
+                System.out.println("Added: " + bill);
+            } else if (choice == 10) {
+                if (!billQueue.isEmpty()) {
+                    String bill = billQueue.poll();
+                    System.out.println("Processing: " + bill);
+                } else {
+                    System.out.println("No bills in queue");
+                }
+            } else if (choice == 11) {
+                System.out.println("Bill Queue: ");
+                for (String b : billQueue) {
+                    System.out.println(b);
+                }
+            } else if (choice == 12) {
+                System.out.println("Enter username: ");
+                String username = sc.nextLine();
+
+                System.out.println("Enter initial balance: ");
+                double balance = sc.nextDouble();
+                sc.nextLine();
+
+                int accountNumber = accounts.size() + accountRequests.size() + 1;
+                BankAccount newAcc = new BankAccount(accountNumber, username, balance);
+                accountRequests.add(newAcc);
+                System.out.println("Request submitted for: " + username);
+
+            } else if (choice == 13) {
+                if (!accountRequests.isEmpty()) {
+                    BankAccount acc = accountRequests.poll();
+                    accounts.add(acc);
+
+                    System.out.println("Account approved: " + acc.username);
+                } else {
+                    System.out.println("No pending requests");
+                }
+            } else if (choice == 14) {
+                System.out.println("Pending requests:");
+
+                for (BankAccount acc : accountRequests) {
+                    System.out.println(acc.accountNumber + ". " + acc.username + " - " + acc.balance);
+                }
+            } else if (choice == 15) {
+                break;
+            } else {
+                System.out.println("Invalid choice");
+            }
+        }
     }
-    printNumber(n / 10);
-    System.out.println(n % 10);
-}
-public static void main(String[] args) {
-    printNumber(5481);
-}
-
-/// Task 2. Average of Elements
-public static int sum(int[] arr, int n) {
-    if (n == 0) {
-        return 0;
-    }
-    return arr[n - 1] + sum(arr, n - 1);
-}
-public static void main(String[] args) {
-    int[] arr = {3, 2, 4, 1};
-
-    int total = sum(arr, arr.length);
-    double average = (double) total / arr.length;
-    System.out.println(average);
-}
-
-/// Task 3. Prime Number Check
-public static boolean isPrime(int n, int i) {
-    if (n <= 2) {
-        return n == 2;
-    }
-    if (n % i == 0) {
-        return false;
-    }
-    if (i * i > n) {
-        return true;
-    }
-    return isPrime(n, i + 1);
-}
-public static void main(String[] args) {
-    int n = 7;
-
-    if (isPrime(n, 2)) {
-        System.out.println("Prime");
-    } else {
-        System.out.println("Composite");
-    }
-}
-
-///Task 4. Factorial
-public static int factorial(int n) {
-    if (n == 0 || n == 1) {
-        return 1;
-    }
-    return n * factorial(n - 1);
-}
-public static void main(String[] args) {
-    int n = 5;
-
-    System.out.println(factorial(n));
-}
-
-///Task 5. Fibonacci Number
-public static int fibonacci(int n) {
-    if (n == 0) {
-        return 0;
-    }
-    if (n == 1) {
-        return 1;
-    }
-    return fibonacci(n - 1) + fibonacci(n - 2);
-}
-public static void main(String[] args) {
-    int n = 17;
-
-    System.out.println(fibonacci(n));
-}
-
-///Task 6. Power Function
-public static int power(int a, int n) {
-    if (n == 0) {
-        return 1;
-    }
-    return a * power(a, n - 1);
-}
-public static void main(String[] args) {
-    int a = 2;
-    int n = 10;
-
-    System.out.println(power(a, n));
-}
-
-///Task 7. Reverse Output
-public static void reverse(int n) {
-    if (n == 0) {
-        return;
-    }
-    int x = n % 10;
-    System.out.print(x + " ");
-
-    reverse(n / 10);
-}
-public static void main(String[] args) {
-    int n = 1234;
-
-    reverse(n);
-}
-
-///Task 8. Check Digits in String
-public static boolean isDigits(String s, int index) {
-    if (index == s.length()) {
-        return true;
-    }
-    if (!Character.isDigit(s.charAt(index))) {
-        return false;
-    }
-    return isDigits(s, index + 1);
-}
-public static void main(String[] args) {
-    String s = "123a12";
-
-    if (isDigits(s, 0)) {
-        System.out.println("Yes");
-    } else {
-        System.out.println("No");
-    }
-}
-
-///Task 9. Count Characters in a String
-public static int countChar(String s) {
-    if (s.equals("")) {
-        return 0;
-    }
-    return 1 + countChar(s.substring(1));
-}
-public static void main(String[] args) {
-    String s = "hello";
-
-    System.out.println(countChar(s));
-}
-
-///Task 10. Greatest Common Divisor (GCD)
-public static int gcd(int a, int b) {
-    if (b == 0) {
-        return a;
-    }
-    return gcd(b, a % b);
-}
-public static void main(String[] args) {
-    int a = 32;
-    int b = 48;
-
-    System.out.println(gcd(a, b));
 }
